@@ -1,0 +1,165 @@
+---
+title: "diamonds"
+author: "Sawsan Alamoodi"
+date: "11/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(DT) 
+```
+
+```{r}
+#1-Reading data and save it as an object called jems
+jems <- read_csv('diamonds.csv')
+
+```
+
+```{r}
+#2-Type of data each column
+glimpse(jems)
+str(jems)
+
+```
+
+#3 
+```{r}
+#All diamonds with a clarity of category “IF” are present in the data-set
+f<-
+jems %>%
+ filter(clarity == "IF") 
+nrow(f)
+f
+#Fraction of the total they represent
+g <- length(jems$clarity)
+j<- nrow(f)/g
+j
+
+```
+#4
+```{r}
+#The proportion of the whole is made up of each category of clarity
+ IF <-
+        filter(jems,clarity == "IF") 
+         nrow(IF)/g
+   I1<- filter(jems,clarity == "I1") 
+         nrow(I1)/g
+  VVS1<- filter(jems,clarity == "VVS1") 
+         nrow(VVS1)/g
+   VVS2<-filter(jems,clarity == "VVS2")
+         nrow(VVS2)/g
+   VS2<- filter(jems,clarity == "VS2")
+         nrow(VS2)/g
+    VS1<-filter(jems,clarity == "VS1")
+         nrow(VS1)/g
+   SI1<-filter(jems,clarity == "SI1")
+        nrow(SI1)/g
+   SI2<-filter(jems,clarity == "SI2")
+        nrow(SI2)/g
+
+IF 
+I1
+VVS1
+VVS2
+VS2
+VS1
+SI1
+SI2
+
+```
+#5
+```{r}
+#The cheapest diamond price overall
+attach(jems)
+min(price)
+
+#The range of diamond prices
+range(price)
+
+#The average diamond price in each category of cut and color
+jems %>%
+  group_by(cut,color) %>%
+  summarise(avg_price=mean(price),.groups='drop')
+
+
+
+```
+#6
+```{r}
+#Scatter plot that shows the price of a diamond as described by another continous variable carat.
+jems %>%
+  ggplot(aes(x=carat,y=price ,col=price, size=price, title="price of a diamond described by carat"))+
+   geom_point(alpha=0.3)
+   
+facet_wrap(~ clarity)
+  
+
+```
+
+
+```{r}
+#plot(price ~ carat)
+
+```
+
+#7
+```{r}
+# A-The relationship between these two variables(PRICE,carat). 
+ jems %>%
+  group_by(carat,clarity,price) %>%
+  summarise(avg=mean(price),.groups='drop')
+  
+```
+B-Do you think that you can use the carat weight of a diamond to predict its price?
+THE plot shows a positive correlation between carat and price,The model showed an increase in price depending on carat
+weight,but as we see above that clarity with carat would give more better prediction for the price .
+
+
+#8
+```{r}
+#Apply a log10 transformation to both the price and carat and save these as new columns in the data set called price_log10 and carat_log10.
+jems.new<-select(jems,carat,price) %>%
+mutate(carat_log=log(carat)) %>%
+mutate(price_log=log(price))
+jems.new
+
+
+```
+#9
+```{r}
+#Scatter plot that shows the price of a diamond as described by another continous variable, carat.
+jems.new %>%
+  ggplot(aes(x=carat_log,y=price_log ,col=price, size=price, title("price of a diamond described by carat"))) +
+   geom_point(alpha=0.3)
+   
+   #facet_wrap( ~ clarity)
+  
+```
+
+#10
+```{r}
+#Using lm() to recreate a model that describes the relatioship shown in the plot
+jems_lm <- lm(price ~ carat, data = jems)
+jems_lm
+
+datatable(anova(jems_lm))
+```
+#11
+```{r}
+#Display that on the plot
+jems %>%
+  ggplot(aes(x=carat,y=price ,col=price, size=price, title="price of a diamond described by carat"))+
+   geom_point(alpha=0.3)+
+   geom_smooth(method = lm)
+   #facet_wrap( ~ clarity)
+  
+```
+

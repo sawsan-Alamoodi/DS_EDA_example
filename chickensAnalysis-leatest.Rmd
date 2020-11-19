@@ -1,0 +1,78 @@
+---
+title: "Chickens Analysis"
+author: "Sawsan Alamoodi"
+date:  "4/5/2020"
+output: html_document 
+
+---
+
+```{r setup, include=FALSE} 
+ knitr::opts_chunk$set(echo = FALSE ,message = FALSE ,warning = FALSE)
+#load packages 
+
+library(tidyverse)
+library(rio)
+library(Hmisc)
+library(shiny)
+library(agricolae)
+library(DT) 
+```
+
+
+
+**Descriptive Statistics**
+```{r chickavg}
+#food-wise mean and standard deviation
+t<- chickwts %>% 
+  group_by(feed) %>% 
+  summarise(n=length(feed),avg = mean(weight), SD=sd(weight)) 
+datatable(t)
+
+```
+ **Plots**
+
+```{r chickbox , echo=FALSE}
+#weight as described by feed presented in boxplot:
+ggplot(chickwts, aes(x = feed, y = weight)) +
+  geom_boxplot()
+```
+
+
+```{r chickjit , echo=FALSE}
+#Summary statistics and raw values:
+
+ggplot(chickwts, aes(x = feed, y = weight)) +
+  geom_jitter(width = 0.30) +
+  stat_summary(fun.data = mean_sdl, 
+               fun.args = list(mult = 1), 
+               col = "red") 
+```
+
+```{r}
+#
+chickwts %>%
+  group_by(feed) %>%
+  mutate(Z_score = scale(weight))
+```
+
+
+**Inferential Statistics**
+
+The one-way ANOVA summary:
+```{r chicklm , echo=FALSE}
+#Applying a linear model this will calculate an ANOVA table on the linear model of weight described by feed to tell if the results are significant 
+chickwts_lm <- lm(weight ~ feed, data = chickwts)
+chickwts_lm
+
+datatable(anova(chickwts_lm))
+```
+
+ 
+Tukey’s Post-hoc test:
+```{r chickAv , echo=FALSE}
+#to studentized range distribution
+chickwts.av <-aov(weight ~ feed , data = chickwts)
+tukeyTest <- TukeyHSD(chickwts.av)
+datatable(tukeyTest$feed)
+`
+``
